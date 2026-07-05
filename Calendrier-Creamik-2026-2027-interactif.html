@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendrier Créamik 2026-2027 — Formation professionnelle céramique</title>
+<style>
+  :root{
+    --tournage:#9DC3E6;
+    --email:#F4B183;
+    --platre:#A9D18E;
+    --pmsmp:#C0504D;
+    --vacances:#FFD966;
+    --po:#8E5EA8;
+    --stage-tournage:#01a27c;
+    --stage-email:#2eb9cc;
+    --stage-we:#FF10C0;
+    --we-bleu:#1F51FF;
+    --menage:#795548;
+    --ink:#2b2b2b;
+    --line:#e0e0e0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#f6f7f9;padding:20px;}
+  .wrap{max-width:1150px;margin:0 auto;}
+
+  header{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 24px;margin-bottom:14px;}
+  header h1{font-size:1.35rem;color:#1a5276;}
+  header .sub{color:#666;font-size:.9rem;margin-top:4px;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;background:#fafafa;border:1px solid var(--line);border-radius:20px;padding:4px 12px;}
+  .dot{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.15);}
+
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin-bottom:14px;flex-wrap:wrap;}
+  .toolbar .nav{display:flex;align-items:center;gap:8px;}
+  .toolbar button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 14px;font-size:.9rem;cursor:pointer;}
+  .toolbar button:hover{background:#f0f4f8;}
+  .toolbar button.active{background:#1a5276;color:#fff;border-color:#1a5276;}
+  #monthTitle{font-size:1.15rem;font-weight:600;min-width:190px;text-align:center;text-transform:capitalize;}
+  select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:.9rem;background:#fff;cursor:pointer;}
+
+  .cal{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);background:#f0f2f5;border-bottom:1px solid var(--line);}
+  .dow div{padding:8px 4px;text-align:center;font-size:.78rem;font-weight:600;color:#555;text-transform:uppercase;}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);}
+  .cell{min-height:92px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;position:relative;background:#fff;}
+  .cell:nth-child(7n){border-right:none;}
+  .cell.out{background:#fafafa;}
+  .cell.out .num{color:#c5c5c5;}
+  .num{font-size:.82rem;font-weight:600;margin-bottom:4px;}
+  .fill{border-radius:6px;padding:3px 6px;font-size:.7rem;font-weight:600;margin-bottom:3px;line-height:1.25;}
+  .fill.tournage{background:var(--tournage);}
+  .fill.email{background:var(--email);}
+  .fill.platre{background:var(--platre);}
+  .fill.pmsmp{background:var(--pmsmp);color:#fff;}
+  .fill.vacances{background:var(--vacances);}
+  .fill.stage-tournage{background:var(--stage-tournage);color:#fff;}
+  .fill.stage-email{background:var(--stage-email);color:#fff;}
+  .fill.menage{background:var(--menage);color:#fff;}
+  .chip{border-radius:6px;padding:3px 6px;font-size:.68rem;font-weight:600;color:#fff;margin-bottom:3px;line-height:1.25;}
+  .chip.po{background:var(--po);}
+  .chip.stage-tournage{background:var(--stage-tournage);}
+  .chip.stage-email{background:var(--stage-email);}
+  .chip.stage-we{background:var(--stage-we);}
+  .chip.we-bleu{background:var(--we-bleu);}
+
+  /* Vue année */
+  .year{display:none;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+  .mini{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;}
+  .mini h3{font-size:.95rem;text-align:center;margin-bottom:8px;color:#1a5276;text-transform:capitalize;cursor:pointer;}
+  .mini h3:hover{text-decoration:underline;}
+  .mini .mg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .mini .md{font-size:.66rem;text-align:center;padding:4px 0;border-radius:4px;position:relative;}
+  .mini .mh{font-size:.6rem;text-align:center;font-weight:700;color:#888;}
+  .mini .md.out{color:#ccc;}
+  .mini .md.po-full{background:var(--po)!important;color:#fff;font-weight:700;}
+  .mini .md.we-full{background:var(--stage-we)!important;color:#fff;font-weight:700;}
+  .mini .md.stage-half{color:#fff;font-weight:700;text-shadow:0 0 2px rgba(0,0,0,.45);}
+
+  .info{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;font-size:.88rem;}
+  .card h2{font-size:1rem;color:#1a5276;margin-bottom:10px;}
+  .card ul{list-style:none;}
+  .card li{padding:5px 0;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;}
+  .card li:last-child{border-bottom:none;}
+  .card .note{color:#777;font-size:.8rem;margin-top:8px;font-style:italic;}
+  footer{text-align:center;color:#999;font-size:.78rem;margin-top:18px;}
+  @media(max-width:700px){.info{grid-template-columns:1fr;} .cell{min-height:70px;} .fill,.chip{font-size:.58rem;padding:2px 3px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>École Créamik — Calendrier 2026-2027</h1>
+    <div class="sub">Formation professionnelle céramique de longue durée · 1271 heures · Horaires : 9h-13h / 14h-18h (8h/jour, mardi au vendredi, 32h/semaine)</div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--tournage)"></i>Tournage</span>
+      <span><i class="dot" style="background:var(--email)"></i>Émail</span>
+      <span><i class="dot" style="background:var(--platre)"></i>Plâtre</span>
+      <span><i class="dot" style="background:var(--pmsmp)"></i>PMSMP (mise en situation en milieu professionnel)</span>
+      <span><i class="dot" style="background:var(--vacances)"></i>Vacances / fériés</span>
+      <span><i class="dot" style="background:var(--po)"></i>Portes ouvertes</span>
+      <span><i class="dot" style="background:var(--stage-tournage)"></i>Stage court tournage</span>
+      <span><i class="dot" style="background:var(--stage-email)"></i>Stage court émail</span>
+      <span><i class="dot" style="background:var(--stage-we)"></i>Stage week-end tournage (2 jours)</span>
+      <span><i class="dot" style="background:var(--we-bleu)"></i>Week-ends imaginés avec Perrine</span>
+      <span><i class="dot" style="background:var(--menage)"></i>Ménage / rangement</span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="nav">
+      <button id="prev">&#8249; Préc.</button>
+      <div id="monthTitle"></div>
+      <button id="next">Suiv. &#8250;</button>
+    </div>
+    <div class="nav">
+      <select id="monthSelect"></select>
+      <button id="viewMonth" class="active">Vue mois</button>
+      <button id="viewYear">Vue année</button>
+    </div>
+  </div>
+
+  <div class="cal" id="calMonth">
+    <div class="dow"><div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="year" id="calYear"></div>
+
+  <div class="info">
+    <div class="card">
+      <h2>Dates clés</h2>
+      <ul>
+        <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 17 octobre 2026, 14h</li>
+        <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 20 février 2027, 14h</li>
+        <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 24 avril 2027, 14h</li>
+        <li><i class="dot" style="background:var(--stage-tournage)"></i>Stage court tournage — du 25 au 29 janvier 2027</li>
+        <li><i class="dot" style="background:var(--stage-email)"></i>Stage court émail — du 1<sup>er</sup> au 6 février 2027</li>
+        <li><i class="dot" style="background:var(--we-bleu)"></i>Week-ends imaginés avec Perrine — 21-22 nov. 2026 · 6-7 mars 2027 · 22-23 mai 2027</li>
+        <li><i class="dot" style="background:var(--stage-tournage)"></i>Stage tournage été — du lundi 5 au vendredi 9 juillet 2027</li>
+        <li><i class="dot" style="background:var(--stage-email)"></i>Stage émail été — du lundi 12 au samedi 17 juillet 2027</li>
+        <li><i class="dot" style="background:var(--stage-email)"></i>Stage émail été — du lundi 16 au samedi 21 août 2027</li>
+      </ul>
+      <h2 style="margin-top:14px;">Stages week-end tournage (2 jours)</h2>
+      <ul id="weList"></ul>
+      <p class="note">Les stages courts se superposent aux semaines PMSMP : les stagiaires des semaines courtes ne sont pas ceux de la formation à l'année.</p>
+    </div>
+    <div class="card">
+      <h2>Totaux de l'année</h2>
+      <ul>
+        <li>Présentiel : 137 jours / 35 semaines — 1096 h</li>
+        <li>PMSMP : 25 jours / 5 semaines — 175 h</li>
+        <li><strong>Total : 162 jours / 40 semaines — 1271 h</strong></li>
+      </ul>
+      <p class="note">Atelier Créamik · 7, rue de Port-Anna, 56860 Séné · 06 41 18 25 21</p>
+    </div>
+  </div>
+
+  <footer>Cycle 01 : septembre 2026 → janvier 2027 · Cycle 02 : février → juin 2027</footer>
+</div>
+
+<script>
+const LABELS={tournage:'Tournage',email:'Émail',platre:'Plâtre',pmsmp:'PMSMP',vacances:'Vacances','stage-tournage':'Stage tournage','stage-email':'Stage émail',menage:'Ménage / rangement'};
+const COLORS={tournage:'#9DC3E6',email:'#F4B183',platre:'#A9D18E',pmsmp:'#C0504D',vacances:'#FFD966','stage-tournage':'#01a27c','stage-email':'#2eb9cc',menage:'#795548'};
+const WHITE_TEXT=['pmsmp','stage-tournage','stage-email','menage'];
+
+/* Périodes de formation (jours : 1=lun ... 7=dim) */
+const PERIODS=[
+ {f:'2026-09-01',t:'2026-10-09',type:'tournage',days:[2,3,4,5]},
+ {f:'2026-10-13',t:'2026-10-23',type:'email',days:[2,3,4,5]},
+ {f:'2026-10-27',t:'2026-10-30',type:'vacances',days:[2,3,4,5],label:'Vacances'},
+ {f:'2026-11-11',t:'2026-11-11',type:'vacances',days:[3],label:'Férié (11 nov.)'},
+ {f:'2026-11-03',t:'2026-12-04',type:'tournage',days:[2,3,4,5]},
+ {f:'2026-12-08',t:'2026-12-18',type:'platre',days:[2,3,4,5]},
+ {f:'2026-12-22',t:'2026-12-25',type:'vacances',days:[2,3,4,5],label:'Vacances'},
+ {f:'2026-12-29',t:'2026-12-31',type:'vacances',days:[2,3,4],label:'Vacances'},
+ {f:'2027-01-01',t:'2027-01-01',type:'vacances',days:[5],label:'Férié (1er janv.)'},
+ {f:'2027-01-05',t:'2027-01-22',type:'tournage',days:[2,3,4,5]},
+ {f:'2027-01-25',t:'2027-01-29',type:'pmsmp',days:[1,2,3,4,5]},
+ {f:'2027-02-01',t:'2027-02-12',type:'pmsmp',days:[1,2,3,4,5]},
+ {f:'2027-02-16',t:'2027-02-26',type:'tournage',days:[2,3,4,5]},
+ {f:'2027-03-02',t:'2027-03-05',type:'tournage',days:[2,3,4,5]},
+ {f:'2027-03-09',t:'2027-03-19',type:'email',days:[2,3,4,5]},
+ {f:'2027-03-23',t:'2027-04-02',type:'tournage',days:[2,3,4,5]},
+ {f:'2027-04-05',t:'2027-04-16',type:'pmsmp',days:[1,2,3,4,5]},
+ {f:'2027-04-20',t:'2027-04-30',type:'platre',days:[2,3,4,5]},
+ {f:'2027-05-04',t:'2027-05-05',type:'tournage',days:[2,3]},
+ {f:'2027-05-06',t:'2027-05-06',type:'vacances',days:[4],label:'Ascension'},
+ {f:'2027-05-07',t:'2027-05-07',type:'vacances',days:[5],label:'Pont'},
+ {f:'2027-05-11',t:'2027-06-25',type:'tournage',days:[2,3,4,5]},
+ {f:'2027-07-05',t:'2027-07-09',type:'stage-tournage',days:[1,2,3,4,5],label:'Stage tournage'},
+ {f:'2027-07-12',t:'2027-07-17',type:'stage-email',days:[1,2,3,4,5,6],label:'Stage émail'},
+ {f:'2027-08-16',t:'2027-08-21',type:'stage-email',days:[1,2,3,4,5,6],label:'Stage émail'},
+ {f:'2027-08-23',t:'2027-08-27',type:'menage',days:[1,2,3,4,5],label:'Ménage / rangement'}
+];
+
+/* Événements ajoutés (chips) */
+const EVENTS=[
+ {f:'2026-10-17',t:'2026-10-17',cls:'po',label:'Portes ouvertes · 14h'},
+ {f:'2027-02-20',t:'2027-02-20',cls:'po',label:'Portes ouvertes · 14h'},
+ {f:'2027-04-24',t:'2027-04-24',cls:'po',label:'Portes ouvertes · 14h'},
+ {f:'2027-01-25',t:'2027-01-29',cls:'stage-tournage',label:'Stage tournage'},
+ {f:'2027-02-01',t:'2027-02-06',cls:'stage-email',label:'Stage émail'},
+ {f:'2026-11-21',t:'2026-11-22',cls:'we-bleu',label:'WE imaginé avec Perrine'},
+ {f:'2027-03-06',t:'2027-03-07',cls:'we-bleu',label:'WE imaginé avec Perrine'},
+ {f:'2027-05-22',t:'2027-05-23',cls:'we-bleu',label:'WE imaginé avec Perrine'}
+];
+const EVCOLORS={po:'#8E5EA8','stage-tournage':'#01a27c','stage-email':'#2eb9cc','stage-we':'#FF10C0','we-bleu':'#1F51FF'};
+
+/* Stages week-end tournage (samedi = 1er jour, dimanche = 2e) */
+const WE_SATS=['2026-10-03','2026-11-07','2026-12-05','2027-01-16','2027-03-06','2027-04-03','2027-05-22','2027-06-26'];
+function weekendStages(){
+  return WE_SATS.flatMap((s,i)=>{
+    const d=new Date(s+'T00:00:00Z');
+    const sun=new Date(d);sun.setUTCDate(d.getUTCDate()+1);
+    const k2=sun.toISOString().slice(0,10);
+    return [{f:s,t:s,cls:'stage-we',label:'Stage WE tournage '+(i+1)+'/8'},{f:k2,t:k2,cls:'stage-we',label:'Stage WE tournage '+(i+1)+'/8'}];
+  });
+}
+
+const MONTHS=[[2026,8],[2026,9],[2026,10],[2026,11],[2027,0],[2027,1],[2027,2],[2027,3],[2027,4],[2027,5],[2027,6],[2027,7]];
+const MNAMES=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function inRange(k,f,t){return k>=f&&k<=t;}
+function isoDow(d){return d.getDay()===0?7:d.getDay();}
+
+function activityFor(d){
+  const k=key(d),dw=isoDow(d);
+  for(const p of PERIODS){if(inRange(k,p.f,p.t)&&p.days.includes(dw))return p;}
+  return null;
+}
+function eventsFor(d){
+  const k=key(d);
+  return EVENTS.concat(weekendStages()).filter(e=>inRange(k,e.f,e.t));
+}
+
+let cur=0; // index dans MONTHS
+const grid=document.getElementById('grid');
+const title=document.getElementById('monthTitle');
+const sel=document.getElementById('monthSelect');
+
+MONTHS.forEach((m,i)=>{
+  const o=document.createElement('option');
+  o.value=i;o.textContent=MNAMES[m[1]]+' '+m[0];
+  sel.appendChild(o);
+});
+
+function renderMonth(){
+  const [y,m]=MONTHS[cur];
+  title.textContent=MNAMES[m]+' '+y;
+  sel.value=cur;
+  document.getElementById('prev').disabled=(cur===0);
+  document.getElementById('next').disabled=(cur===MONTHS.length-1);
+  grid.innerHTML='';
+  const first=new Date(y,m,1);
+  const start=new Date(first);
+  start.setDate(1-(isoDow(first)-1));
+  for(let i=0;i<42;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    if(i===35&&d.getMonth()!==m)break;
+    const cell=document.createElement('div');
+    cell.className='cell'+(d.getMonth()!==m?' out':'');
+    cell.innerHTML='<div class="num">'+d.getDate()+'</div>';
+    if(d.getMonth()===m){
+      const a=activityFor(d);
+      if(a){const f=document.createElement('div');f.className='fill '+a.type;f.textContent=a.label||LABELS[a.type];cell.appendChild(f);}
+      for(const e of eventsFor(d)){const c=document.createElement('div');c.className='chip '+e.cls;c.textContent=e.label;cell.appendChild(c);}
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function renderYear(){
+  const yr=document.getElementById('calYear');
+  yr.innerHTML='';
+  MONTHS.forEach((mm,idx)=>{
+    const [y,m]=mm;
+    const box=document.createElement('div');box.className='mini';
+    const h=document.createElement('h3');h.textContent=MNAMES[m]+' '+y;
+    h.onclick=()=>{cur=idx;setView('month');};
+    box.appendChild(h);
+    const g=document.createElement('div');g.className='mg';
+    ['L','M','M','J','V','S','D'].forEach(x=>{const e=document.createElement('div');e.className='mh';e.textContent=x;g.appendChild(e);});
+    const first=new Date(y,m,1);
+    for(let i=1;i<isoDow(first);i++){const e=document.createElement('div');g.appendChild(e);}
+    const last=new Date(y,m+1,0).getDate();
+    for(let dd=1;dd<=last;dd++){
+      const d=new Date(y,m,dd);
+      const e=document.createElement('div');e.className='md';e.textContent=dd;
+      const a=activityFor(d);
+      if(a){e.style.background=COLORS[a.type];if(WHITE_TEXT.includes(a.type))e.style.color='#fff';e.title=a.label||LABELS[a.type];}
+      const evs=eventsFor(d);
+      const po=evs.find(ev=>ev.cls==='po');
+      const we=evs.find(ev=>ev.cls==='stage-we');
+      const bl=evs.find(ev=>ev.cls==='we-bleu');
+      const st=evs.find(ev=>ev.cls!=='po'&&ev.cls!=='stage-we'&&ev.cls!=='we-bleu');
+      if(bl&&we){
+        /* WE réservé + stage WE : moitié bleu / moitié rose */
+        e.classList.add('stage-half');
+        e.style.background='linear-gradient(90deg, '+EVCOLORS['we-bleu']+' 50%, '+EVCOLORS['stage-we']+' 50%)';
+        e.title=bl.label+' · '+we.label;
+      }else if(bl){
+        /* WE réservé seul : moitié bleu / moitié couleur de l'autre activité */
+        const other=a?COLORS[a.type]:'#f2f2f2';
+        e.classList.add('stage-half');
+        e.style.background='linear-gradient(90deg, '+EVCOLORS['we-bleu']+' 50%, '+other+' 50%)';
+        e.title=bl.label+(a?' · '+(a.label||LABELS[a.type]):'');
+      }else if(we){
+        /* Stage week-end : case entière rose fluo */
+        e.classList.add('we-full');e.style.background='';
+        e.title=we.label;
+      }else if(po){
+        /* Portes ouvertes : barre pleine case */
+        e.classList.add('po-full');e.style.background='';
+        e.title=(a?(a.label||LABELS[a.type])+' · ':'')+po.label;
+      }else if(st){
+        /* Stage : moitié gauche stage, moitié droite activité en cours */
+        const other=a?COLORS[a.type]:'#f2f2f2';
+        e.classList.add('stage-half');
+        e.style.background='linear-gradient(90deg, '+EVCOLORS[st.cls]+' 50%, '+other+' 50%)';
+        e.title=st.label+(a?' · '+(a.label||LABELS[a.type]):'');
+      }
+      g.appendChild(e);
+    }
+    box.appendChild(g);
+    yr.appendChild(box);
+  });
+}
+
+function setView(v){
+  document.getElementById('calMonth').style.display=(v==='month')?'block':'none';
+  document.getElementById('calYear').style.display=(v==='year')?'grid':'none';
+  document.getElementById('viewMonth').classList.toggle('active',v==='month');
+  document.getElementById('viewYear').classList.toggle('active',v==='year');
+  document.querySelector('.toolbar .nav').style.visibility=(v==='month')?'visible':'hidden';
+  if(v==='month')renderMonth();
+}
+
+document.getElementById('prev').onclick=()=>{if(cur>0){cur--;renderMonth();}};
+document.getElementById('next').onclick=()=>{if(cur<MONTHS.length-1){cur++;renderMonth();}};
+sel.onchange=()=>{cur=+sel.value;renderMonth();};
+document.getElementById('viewMonth').onclick=()=>setView('month');
+document.getElementById('viewYear').onclick=()=>setView('year');
+
+const FR_M=['janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+function renderWeList(){
+  const ul=document.getElementById('weList');
+  ul.innerHTML='';
+  WE_SATS.forEach((s,i)=>{
+    const d=new Date(s+'T00:00:00Z');
+    const sun=new Date(d);sun.setUTCDate(d.getUTCDate()+1);
+    const li=document.createElement('li');
+    li.innerHTML='<i class="dot" style="background:var(--stage-we)"></i>Stage '+(i+1)+' — sam. '+d.getUTCDate()+' &amp; dim. '+sun.getUTCDate()+' '+FR_M[sun.getUTCMonth()]+' '+sun.getUTCFullYear();
+    ul.appendChild(li);
+  });
+}
+renderMonth();
+renderYear();
+renderWeList();
+</script>
+</body>
+</html>
