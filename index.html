@@ -136,10 +136,10 @@
       <ul>
         <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 17 octobre 2026, 14h</li>
         <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 20 février 2027, 14h</li>
-        <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 24 avril 2027, 14h</li>
+        <li><i class="dot" style="background:var(--po)"></i>Portes ouvertes — samedi 17 avril 2027, 14h</li>
         <li><i class="dot" style="background:var(--stage-tournage)"></i>Stage court tournage — du 25 au 29 janvier 2027</li>
         <li><i class="dot" style="background:var(--stage-email)"></i>Stage court émail — du 1<sup>er</sup> au 6 février 2027</li>
-        <li><i class="dot" style="background:var(--we-bleu)"></i>Week-ends imaginés avec Perrine — 21-22 nov. 2026 · 6-7 mars 2027 · 22-23 mai 2027</li>
+        <li><i class="dot" style="background:var(--we-bleu)"></i>Week-ends imaginés avec Perrine — 7-8 nov. 2026 · 6-7 mars 2027 · 22-23 mai 2027</li>
         <li><i class="dot" style="background:var(--stage-tournage)"></i>Stage tournage été — du lundi 5 au vendredi 9 juillet 2027</li>
         <li><i class="dot" style="background:var(--stage-email)"></i>Stage émail été — du lundi 12 au samedi 17 juillet 2027</li>
         <li><i class="dot" style="background:var(--stage-email)"></i>Stage émail été — du lundi 16 au samedi 21 août 2027</li>
@@ -197,27 +197,37 @@ const PERIODS=[
  {f:'2027-08-23',t:'2027-08-27',type:'menage',days:[1,2,3,4,5],label:'Ménage / rangement'}
 ];
 
+/* Demi-semaines vacances : moitié gauche jaune, moitié droite activité en cours */
+const HALF_VAC=[
+ {f:'2027-02-08',t:'2027-02-12',days:[1,2,3,4,5]},
+ {f:'2027-04-05',t:'2027-04-16',days:[1,2,3,4,5]}
+];
+function halfVacFor(d){
+  const k=key(d),dw=isoDow(d);
+  return HALF_VAC.some(p=>k>=p.f&&k<=p.t&&p.days.includes(dw));
+}
+
 /* Événements ajoutés (chips) */
 const EVENTS=[
  {f:'2026-10-17',t:'2026-10-17',cls:'po',label:'Portes ouvertes · 14h'},
  {f:'2027-02-20',t:'2027-02-20',cls:'po',label:'Portes ouvertes · 14h'},
- {f:'2027-04-24',t:'2027-04-24',cls:'po',label:'Portes ouvertes · 14h'},
+ {f:'2027-04-17',t:'2027-04-17',cls:'po',label:'Portes ouvertes · 14h'},
  {f:'2027-01-25',t:'2027-01-29',cls:'stage-tournage',label:'Stage tournage'},
  {f:'2027-02-01',t:'2027-02-06',cls:'stage-email',label:'Stage émail'},
- {f:'2026-11-21',t:'2026-11-22',cls:'we-bleu',label:'WE imaginé avec Perrine'},
+ {f:'2026-11-07',t:'2026-11-08',cls:'we-bleu',label:'WE imaginé avec Perrine'},
  {f:'2027-03-06',t:'2027-03-07',cls:'we-bleu',label:'WE imaginé avec Perrine'},
  {f:'2027-05-22',t:'2027-05-23',cls:'we-bleu',label:'WE imaginé avec Perrine'}
 ];
 const EVCOLORS={po:'#8E5EA8','stage-tournage':'#01a27c','stage-email':'#2eb9cc','stage-we':'#FF10C0','we-bleu':'#1F51FF'};
 
 /* Stages week-end tournage (samedi = 1er jour, dimanche = 2e) */
-const WE_SATS=['2026-10-03','2026-11-07','2026-12-05','2027-01-16','2027-03-06','2027-04-03','2027-05-22','2027-06-26'];
+const WE_SATS=['2026-10-03','2026-11-07','2026-12-05','2027-01-16','2027-03-06','2027-04-03','2027-05-22'];
 function weekendStages(){
   return WE_SATS.flatMap((s,i)=>{
     const d=new Date(s+'T00:00:00Z');
     const sun=new Date(d);sun.setUTCDate(d.getUTCDate()+1);
     const k2=sun.toISOString().slice(0,10);
-    return [{f:s,t:s,cls:'stage-we',label:'Stage WE tournage '+(i+1)+'/8'},{f:k2,t:k2,cls:'stage-we',label:'Stage WE tournage '+(i+1)+'/8'}];
+    return [{f:s,t:s,cls:'stage-we',label:'Stage WE tournage '+(i+1)+'/7'},{f:k2,t:k2,cls:'stage-we',label:'Stage WE tournage '+(i+1)+'/7'}];
   });
 }
 
@@ -267,7 +277,8 @@ function renderMonth(){
     cell.innerHTML='<div class="num">'+d.getDate()+'</div>';
     if(d.getMonth()===m){
       const a=activityFor(d);
-      if(a){const f=document.createElement('div');f.className='fill '+a.type;f.textContent=a.label||LABELS[a.type];cell.appendChild(f);}
+      if(a){const f=document.createElement('div');f.className='fill '+a.type;f.textContent=a.label||LABELS[a.type];if(halfVacFor(d)){f.style.background='linear-gradient(90deg, var(--vacances) 50%, '+COLORS[a.type]+' 50%)';f.style.color='#fff';f.style.textShadow='0 0 2px rgba(0,0,0,.55)';f.title='Vacances · '+(a.label||LABELS[a.type]);}cell.appendChild(f);}
+      else if(halfVacFor(d)){const f=document.createElement('div');f.className='fill vacances';f.textContent='Vacances';cell.appendChild(f);}
       for(const e of eventsFor(d)){const c=document.createElement('div');c.className='chip '+e.cls;c.textContent=e.label;cell.appendChild(c);}
     }
     grid.appendChild(cell);
@@ -298,7 +309,12 @@ function renderYear(){
       const we=evs.find(ev=>ev.cls==='stage-we');
       const bl=evs.find(ev=>ev.cls==='we-bleu');
       const st=evs.find(ev=>ev.cls!=='po'&&ev.cls!=='stage-we'&&ev.cls!=='we-bleu');
-      if(bl&&we){
+      if(halfVacFor(d)){
+        /* Demi-semaine vacances : moitié gauche jaune / moitié droite activité */
+        e.classList.add('stage-half');
+        e.style.background='linear-gradient(90deg, '+COLORS['vacances']+' 50%, '+(a?COLORS[a.type]:'#f2f2f2')+' 50%)';
+        e.title='Vacances'+(a?' · '+(a.label||LABELS[a.type]):'');
+      }else if(bl&&we){
         /* WE réservé + stage WE : moitié bleu / moitié rose */
         e.classList.add('stage-half');
         e.style.background='linear-gradient(90deg, '+EVCOLORS['we-bleu']+' 50%, '+EVCOLORS['stage-we']+' 50%)';
